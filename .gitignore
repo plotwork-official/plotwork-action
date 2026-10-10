@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+
+# What the CI runs write. dist/ is committed on purpose: the action runs it as it is.
+/rendered/

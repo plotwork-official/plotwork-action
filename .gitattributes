@@ -1,0 +1,7 @@
+# The bundle and its notices are built in the Plotwork monorepo and committed here; collapse them in diffs and leave them out of language stats.
+dist/** linguist-generated=true -diff
+action.yml linguist-generated=true
+
+# Line endings are part of a picture's hash, so the fixtures and the bundle keep LF on every platform.
+* text=auto eol=lf
+*.svg text eol=lf

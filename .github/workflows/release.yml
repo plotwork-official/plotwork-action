@@ -1,0 +1,46 @@
+# When a release vX.Y.Z is published, moves the major tag vX to the same commit, so `uses: plotwork-official/plotwork-action@vX`
+# picks it up. A prerelease moves nothing. The release tag itself is never moved or rewritten.
+name: release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  major-tag:
+    name: move the major tag
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.release.tag_name }}
+      - name: Check the tag and the bundle
+        id: version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if ! [[ "$TAG" =~ ^v([0-9]+)\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error title=Release::The tag $TAG is not vMAJOR.MINOR.PATCH, so no major tag is moved."
+            exit 1
+          fi
+          (cd dist && sha256sum --check --strict checksums.txt)
+          echo "major=v${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+      - name: Move the major tag
+        env:
+          MAJOR: ${{ steps.version.outputs.major }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          git tag --force "$MAJOR" "$TAG^{commit}"
+          git push --force origin "refs/tags/$MAJOR"
+          echo "Moved $MAJOR to $TAG ($(git rev-parse "$TAG^{commit}"))." >> "$GITHUB_STEP_SUMMARY"

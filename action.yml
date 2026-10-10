@@ -1,0 +1,55 @@
+# Written by the Plotwork monorepo build (pnpm action:build) from apps/action/src/metadata.ts. Do not edit by hand.
+name: 'Plotwork diagrams'
+description: 'Check, sync, validate, and render Plotwork diagrams in Markdown and .diagram files. Offline: no network, token, or telemetry.'
+author: 'Buun Group'
+branding:
+  icon: 'layout'
+  color: 'blue'
+
+inputs:
+  command:
+    description: 'What to do. check fails when a picture is stale or a diagram has an error, and writes nothing. sync redraws the stale pictures in the workspace and commits nothing. validate reports errors and warnings without drawing pictures into files. render draws each .diagram file to a light and a dark SVG in out-dir.'
+    required: false
+    default: 'check'
+  paths:
+    description: 'Markdown files to check, sync, or validate: one glob, file, or folder per line, relative to working-directory. A line that starts with ! leaves out what it matches. node_modules and .git are never searched.'
+    required: false
+    default: '**/*.md'
+  diagrams:
+    description: 'Standalone .diagram files: one glob, file, or folder per line. check and validate report their errors, render draws them, and sync leaves them alone. Empty means none.'
+    required: false
+    default: '**/*.diagram'
+  out-dir:
+    description: 'The folder render writes SVG files to, relative to working-directory. Each file keeps its folder: docs/flow.diagram becomes <out-dir>/docs/flow.svg and flow.dark.svg.'
+    required: false
+    default: 'plotwork-svg'
+  fail-on:
+    description: 'Which problems fail the step. error: errors, and stale pictures in check. warning: warnings as well. never: report only. Problems are annotated either way.'
+    required: false
+    default: 'error'
+  convert-mermaid:
+    description: 'When true, check and sync treat each mermaid fence that converts to Plotwork as a diagram: check reports it, and sync replaces it with a diagram fence and draws it.'
+    required: false
+    default: 'false'
+  summary:
+    description: 'When true, write a job summary: a table of files, their status, and how to fix each problem.'
+    required: false
+    default: 'true'
+  working-directory:
+    description: 'The folder to run in, relative to the repository root. paths, diagrams, and out-dir are relative to it. Annotations and the files output name paths from the repository root.'
+    required: false
+    default: '.'
+
+outputs:
+  stale:
+    description: 'The number of diagrams whose picture was missing or out of date: found by check, redrawn by sync. 0 for validate and render.'
+  errors:
+    description: 'The number of errors found.'
+  warnings:
+    description: 'The number of warnings found.'
+  files:
+    description: 'A JSON array of paths from the repository root. check: the Markdown files that need a sync. sync: the files it wrote. render: the SVG files it wrote. validate: the files with an error.'
+
+runs:
+  using: 'node24'
+  main: 'dist/index.js'

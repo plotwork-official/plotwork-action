@@ -1,0 +1,28 @@
+# Draws every .diagram file to a light and a dark SVG and keeps them as a workflow artifact, for a site build or a release.
+# Copy to .github/workflows/plotwork-render.yml.
+name: plotwork-render
+
+on:
+  push:
+    branches: [main]
+    paths: ['**/*.diagram']
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: plotwork-official/plotwork-action@v1
+        with:
+          command: render
+          diagrams: diagrams/**/*.diagram
+          out-dir: build/diagrams
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: diagrams
+          path: build/diagrams

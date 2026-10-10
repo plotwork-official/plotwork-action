@@ -1,0 +1,6 @@
+flow "Order"
+node shop client "Shop"
+node api service "Orders API"
+node queue queue "Jobs"
+shop -> api : "place order"
+api -> queue : "enqueue"

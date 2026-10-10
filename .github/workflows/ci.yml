@@ -1,0 +1,268 @@
+# Runs the action in this repository (uses: ./) against the fixtures in test/fixtures, once per command, including the runs
+# that must fail, and checks that dist/ is the build it claims to be. Nothing here needs a secret or writes to the repository.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dist:
+    name: dist matches its checksums
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Every file in dist/ is listed in checksums.txt and matches it
+        working-directory: dist
+        run: |
+          sha256sum --check --strict checksums.txt
+          diff <(awk '{ print $2 }' checksums.txt | sort) <(find . -type f ! -name checksums.txt | sed 's#^\./##' | sort)
+      - name: action.yml runs dist/index.js on node24
+        run: |
+          grep -qx "  using: 'node24'" action.yml
+          grep -qx "  main: 'dist/index.js'" action.yml
+      - name: The licence and the notices ship with the bundle
+        run: |
+          cmp LICENSE dist/licenses/LICENSE
+          grep -q 'elkjs' dist/licenses/THIRD-PARTY-NOTICES.md
+
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Passes on pictures that are in sync
+        id: in-sync
+        uses: ./
+        with:
+          paths: test/fixtures/in-sync/**/*.md
+          diagrams: test/fixtures/diagrams/**/*.diagram
+      - name: Assert in-sync outputs
+        env:
+          STALE: ${{ steps.in-sync.outputs.stale }}
+          ERRORS: ${{ steps.in-sync.outputs.errors }}
+          FILES: ${{ steps.in-sync.outputs.files }}
+        run: |
+          test "$STALE" = 0
+          test "$ERRORS" = 0
+          test "$FILES" = '[]'
+
+      - name: Fails on a stale picture
+        id: stale
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: test/fixtures/stale/**/*.md
+          diagrams: ''
+      - name: Assert stale outputs
+        env:
+          OUTCOME: ${{ steps.stale.outcome }}
+          STALE: ${{ steps.stale.outputs.stale }}
+          FILES: ${{ steps.stale.outputs.files }}
+        run: |
+          test "$OUTCOME" = failure
+          test "$STALE" = 1
+          test "$FILES" = '["test/fixtures/stale/docs/guide.md"]'
+          git diff --exit-code
+
+      - name: Fails on an error in a diagram
+        id: broken
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: test/fixtures/broken/README.md
+          diagrams: ''
+      - name: Assert error outputs
+        env:
+          OUTCOME: ${{ steps.broken.outcome }}
+          ERRORS: ${{ steps.broken.outputs.errors }}
+        run: |
+          test "$OUTCOME" = failure
+          test "$ERRORS" = 1
+
+      - name: Reports but passes with fail-on never
+        id: never
+        uses: ./
+        with:
+          paths: test/fixtures/stale/**/*.md
+          diagrams: ''
+          fail-on: never
+      - name: Assert fail-on never outputs
+        env:
+          STALE: ${{ steps.never.outputs.stale }}
+        run: test "$STALE" = 1
+
+      - name: Leaves Mermaid alone by default
+        uses: ./
+        with:
+          paths: test/fixtures/mermaid/notes.md
+          diagrams: ''
+
+      - name: Fails on Mermaid that converts, with convert-mermaid
+        id: mermaid
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: test/fixtures/mermaid/notes.md
+          diagrams: ''
+          convert-mermaid: true
+      - name: Assert Mermaid outputs
+        env:
+          OUTCOME: ${{ steps.mermaid.outcome }}
+          STALE: ${{ steps.mermaid.outputs.stale }}
+        run: |
+          test "$OUTCOME" = failure
+          test "$STALE" = 1
+
+  sync:
+    name: sync
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Redraws the stale picture and converts Mermaid
+        id: sync
+        uses: ./
+        with:
+          command: sync
+          paths: |
+            test/fixtures/stale/**/*.md
+            test/fixtures/mermaid/notes.md
+          convert-mermaid: true
+      - name: Assert sync wrote files and committed nothing
+        env:
+          STALE: ${{ steps.sync.outputs.stale }}
+          FILES: ${{ steps.sync.outputs.files }}
+        run: |
+          test "$STALE" = 2
+          echo "$FILES" | grep -q '"test/fixtures/stale/docs/assets/diagrams/sign-in.svg"'
+          test -f test/fixtures/stale/docs/assets/diagrams/sign-in.dark.svg
+          grep -q '```diagram' test/fixtures/mermaid/notes.md
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          test -n "$(git status --porcelain)"
+      - name: The check passes on what sync wrote
+        uses: ./
+        with:
+          paths: |
+            test/fixtures/stale/**/*.md
+            test/fixtures/mermaid/notes.md
+          diagrams: ''
+          convert-mermaid: true
+
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Passes on valid diagrams, stale or not
+        uses: ./
+        with:
+          command: validate
+          paths: |
+            test/fixtures/in-sync/**/*.md
+            test/fixtures/stale/**/*.md
+          diagrams: test/fixtures/diagrams/**/*.diagram
+      - name: Fails on errors in Markdown and .diagram files
+        id: invalid
+        continue-on-error: true
+        uses: ./
+        with:
+          command: validate
+          paths: test/fixtures/broken/README.md
+          diagrams: test/fixtures/invalid/*.diagram
+      - name: Assert validate outputs
+        env:
+          OUTCOME: ${{ steps.invalid.outcome }}
+          ERRORS: ${{ steps.invalid.outputs.errors }}
+          FILES: ${{ steps.invalid.outputs.files }}
+        run: |
+          test "$OUTCOME" = failure
+          test "$ERRORS" = 2
+          test "$FILES" = '["test/fixtures/broken/README.md","test/fixtures/invalid/bad.diagram"]'
+
+  render:
+    name: render
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Draws each .diagram file in light and dark
+        id: render
+        uses: ./
+        with:
+          command: render
+          diagrams: test/fixtures/diagrams/**/*.diagram
+          out-dir: rendered
+      - name: Assert render outputs
+        env:
+          FILES: ${{ steps.render.outputs.files }}
+        run: |
+          test "$FILES" = '["rendered/test/fixtures/diagrams/flows/order.svg","rendered/test/fixtures/diagrams/flows/order.dark.svg"]'
+          head -c 200 rendered/test/fixtures/diagrams/flows/order.svg | grep -q '^<svg'
+          test -s rendered/test/fixtures/diagrams/flows/order.dark.svg
+      - name: Fails on a diagram with an error, and writes nothing for it
+        id: render-invalid
+        continue-on-error: true
+        uses: ./
+        with:
+          command: render
+          diagrams: test/fixtures/invalid/*.diagram
+          out-dir: rendered-invalid
+      - name: Assert render failure
+        env:
+          OUTCOME: ${{ steps.render-invalid.outcome }}
+        run: |
+          test "$OUTCOME" = failure
+          test ! -e rendered-invalid
+
+  inputs:
+    name: inputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Refuses an unknown command
+        id: bad-command
+        continue-on-error: true
+        uses: ./
+        with:
+          command: deploy
+      - name: Refuses an out-dir outside the repository
+        id: bad-out-dir
+        continue-on-error: true
+        uses: ./
+        with:
+          command: render
+          out-dir: ../outside
+      - name: Assert both failed
+        env:
+          COMMAND: ${{ steps.bad-command.outcome }}
+          OUT_DIR: ${{ steps.bad-out-dir.outcome }}
+        run: |
+          test "$COMMAND" = failure
+          test "$OUT_DIR" = failure

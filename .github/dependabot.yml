@@ -1,0 +1,16 @@
+# Keeps the actions the workflows here use up to date. dist/ has no dependencies to update in this repository: it is built in
+# the Plotwork monorepo, where the engine's dependencies are updated and tested.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    # A release has a week to be found out before it is proposed here.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ci
