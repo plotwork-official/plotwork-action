@@ -59,10 +59,10 @@ Fails when a `diagram` fence has no picture under it, when its picture was drawn
 A stale fence shows up like this in the log, and as an error on line 12 of the file in the pull request:
 
 ```text
-::error file=docs/architecture.md,line=12,title=Stale diagram::The picture under this diagram is missing or out of date.%0AFix: run npx @buun_group/plotwork sync docs/architecture.md, or plotwork-official/plotwork-action@v1 with command: sync, then commit the Markdown file and the SVG files.
+::error file=docs/architecture.md,line=12,title=Stale diagram::The picture under this diagram is missing or out of date.%0AFix: run plotwork-official/plotwork-action@v1 with command: sync, then commit the Markdown file and the SVG files.
 ```
 
-The job summary lists each file with its status and gives one command that redraws every stale picture. That command pins the version of the Plotwork command line built from the same engine as this release, so the pictures it draws pass this check.
+The job summary lists each file with its status and says how to redraw every stale picture: run this action with `command: sync` and the same `paths`, then commit what it wrote. Once the Plotwork command line is on npm, the summary and the annotation also give an `npx` command that pins the version built from the same engine as this release, so the pictures it draws pass this check.
 
 ### sync
 
@@ -182,11 +182,19 @@ The action reads no token and calls no API. Check out with `persist-credentials:
 | [`@buun_group/plotwork`](https://www.npmjs.com/package/@buun_group/plotwork) | The same engine on your machine or in another CI: `npx @buun_group/plotwork sync --check "docs/**/*.md"`. |
 | [`@buun_group/plotwork-mcp`](https://www.npmjs.com/package/@buun_group/plotwork-mcp) | Lets an AI agent write, check, and draw diagrams. |
 
-The three are built from one engine. A release of this action bundles a fixed engine version, and the fix command in its job summary pins the command line release built from the same engine, so a picture redrawn on your machine passes the check in CI.
+The three are built from one engine. A release of this action bundles a fixed engine version. Once the command line release built from the same engine is on npm, the fix in the job summary pins it, so a picture redrawn on your machine passes the check in CI.
 
 ## Versioning
 
-Releases follow [semantic versioning](https://semver.org). `v1` always points to the latest `v1.x.y` release; `release.yml` moves it when a release is published.
+Releases follow [semantic versioning](https://semver.org). They are built and published from the Plotwork monorepo by a workflow, never by hand.
+
+| Ref | What it holds | Use it for |
+|---|---|---|
+| `v1` | The latest stable `v1.x.y` release. `release.yml` moves it when a stable release is published, and only then. | Most workflows. |
+| `v1.2.3` | One stable release. Never moved or deleted. | A workflow that changes only when you change it. |
+| `v1.3.0-beta.2` | One prerelease, marked as a pre-release on GitHub and never the latest release. `v1` does not move for it. | Trying a change before it is stable. |
+| `main` | The latest stable release. It moves only with a stable release. | Reading the code that `v1` runs. |
+| `next` | Every change on its way to the next release, beta or not. It can be ahead of every tag. | Nothing in production; use a beta tag. |
 
 | Change | Release |
 |---|---|
@@ -200,7 +208,7 @@ Any engine change that draws a different picture makes committed pictures stale,
 
 **Does it send my diagrams anywhere?** No. Everything runs in the runner's process. There is no telemetry and no network request.
 
-**Why does the check fail on a picture I just drew?** The picture was drawn by another engine version. Run the fix command from the job summary, which pins the matching command line, or run this action with `command: sync`.
+**Why does the check fail on a picture I just drew?** The picture was drawn by another engine version. Run this action with `command: sync`, which draws with the same engine as the check, or the pinned command from the job summary once it gives one.
 
 **Can it commit for me?** No. It never holds a token. See [sync](#sync) for pairing it with an action that commits.
 

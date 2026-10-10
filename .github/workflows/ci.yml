@@ -1,19 +1,23 @@
 # Runs the action in this repository (uses: ./) against the fixtures in test/fixtures, once per command, including the runs
 # that must fail, and checks that dist/ is the build it claims to be. Nothing here needs a secret or writes to the repository.
+# The monorepo's release workflow pushes a build to `next` (betas) or `main` (stable releases) and tags it only after this
+# workflow passes on that exact commit.
 name: ci
 
 on:
   push:
-    branches: [main]
+    branches: [main, next]
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer commit on a pull request replaces the older run. A run on a pushed commit is never cancelled, because a release
+# waits for its result.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   dist:
