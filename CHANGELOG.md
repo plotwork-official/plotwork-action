@@ -2,6 +2,18 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.0.0-beta.3 (2026-10-16)
+
+
+### Added
+
+* **action:** since, sarif-file, junit-file, retries, and organisation-key publishing
+
+
+### Fixed
+
+* **action:** a summary under 1 MiB, a branch rule hint, and never replacing someone's pr-branch
+
 ## 1.0.0-beta.2 (2026-10-16)
 
 
