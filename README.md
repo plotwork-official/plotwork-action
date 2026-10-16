@@ -131,7 +131,7 @@ Draws each `.diagram` file to a light and a dark SVG in `out-dir`, keeping its f
 
 A complete working example, which is also the smoke test of every release, is [plotwork-examples](https://github.com/plotwork-official/plotwork-examples).
 
-Makes each diagram that the `sources` of `plotwork.config.json` name from its files (Terraform, OpenAPI, Docker Compose, Kubernetes, Prisma, Drizzle, SQL, GitHub Actions workflows, CSV, JSON, folder listings, git logs), applies its overrides file, and fails on drift with what changed: nodes and edges added, removed, and changed. With `mode: write` it writes the diagrams and, by `on-drift`, opens or edits one pull request from `pr-branch` (the default), commits to the branch the run is on (`commit`; never on its own commit), or only fails (`fail`). With `publish: true` and an API key in `PLOTWORK_API_KEY`, each source that has a `publish` section goes to a stable link or an organisation library; only the generated diagram source is sent, never the files it was made from. See [Diagrams as code](https://docs.plotwork.dev/diagrams-as-code).
+Makes each diagram that the `sources` of `plotwork.config.json` name from its files (Terraform, Bicep, ARM templates, Pulumi, CloudFormation, OpenAPI, Docker Compose, Kubernetes, Prisma, Drizzle, SQL, GitHub Actions workflows, CSV, JSON, folder listings, git logs), applies its overrides file, and fails on drift with what changed: nodes and edges added, removed, and changed. With `mode: write` it writes the diagrams and, by `on-drift`, opens or edits one pull request from `pr-branch` (the default), commits to the branch the run is on (`commit`; never on its own commit), or only fails (`fail`). With `publish: true` and an API key in `PLOTWORK_API_KEY`, each source that has a `publish` section goes to a stable link or an organisation library; only the generated diagram source is sent, never the files it was made from. See [Diagrams as code](https://docs.plotwork.dev/diagrams-as-code).
 
 A pull request check:
 
@@ -215,6 +215,48 @@ jobs:
           PLOTWORK_API_KEY: ${{ secrets.PLOTWORK_API_KEY }}
 ```
 
+Publishing with an organisation key needs no other setting: the diagrams go to that organisation's library, which has no public address, so the `published` output gives each one's `svgUrl` for the key and its members. A key works only on the service that made it; set `PLOTWORK_API_URL` for another API, such as a preview.
+
+#### Changed only, and reports
+
+`since` runs only the sources whose files, overrides file, or diagram changed since a git ref, and every source when the settings file changed or a file was deleted. It needs the history, so check out with `fetch-depth: 0`. Keep a nightly run without it: a new release can draw pictures differently with no file change pointing at it.
+
+`sarif-file` writes a SARIF 2.1.0 report (rule `plotwork/drift` for each drifted diagram, and one rule for each diagnostic code) for `github/codeql-action/upload-sarif`, which shows drift in the Security tab. `junit-file` writes a JUnit XML report with one test case for each source, for a test view.
+
+```yaml
+name: diagrams
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # upload the SARIF report
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: plotwork-official/plotwork-action@v1
+        with:
+          command: generate
+          since: ${{ github.event.pull_request.base.sha }}
+          sarif-file: plotwork.sarif
+          junit-file: plotwork.junit.xml
+      - if: ${{ !cancelled() }}
+        uses: github/codeql-action/upload-sarif@24c54180a607b1449ed407dd24f251e4e9147c8d # v4.38.3
+        with:
+          sarif_file: plotwork.sarif
+```
+
+A reusable workflow that a platform team calls from every repository is [plotwork.yml](https://github.com/plotwork-official/plotwork-examples/blob/main/.github/workflows/plotwork.yml) in plotwork-examples, and [Enterprise rollout](https://docs.plotwork.dev/enterprise-rollout) covers required checks, many teams in one repository, and air-gapped runners.
+
 Complete workflows for each command are in [`examples/`](examples).
 
 ## Inputs
@@ -238,6 +280,9 @@ All inputs are optional.
 | `commit-message` | `docs: regenerate diagrams from their sources` | The commit message; the action adds the trailer `Plotwork-Generated: true`. |
 | `publish` | `false` | In write mode, publish each source that has a `publish` section with the key in `PLOTWORK_API_KEY`. Without a key it is skipped with a notice. |
 | `github-token` | `${{ github.token }}` | The token that pushes and opens the pull request. |
+| `since` | `''` | `generate` only. A git ref, such as `origin/main` or `${{ github.event.pull_request.base.sha }}`: only the sources whose files, overrides, or diagram changed since it run, and every source when the settings file changed. Needs `fetch-depth: 0`. Empty runs every source. |
+| `sarif-file` | `''` | `generate` only. A file inside the repository to write a SARIF report to, for `github/codeql-action/upload-sarif`. Empty writes none. |
+| `junit-file` | `''` | `generate` only. A file inside the repository to write a JUnit XML report to, one test case for each source. Empty writes none. |
 | `summary` | `true` | Write a job summary with a table of files and how to fix each problem. |
 | `working-directory` | `.` | The folder to run in, relative to the repository root. Annotations and the `files` output still name paths from the repository root. |
 
@@ -253,7 +298,7 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 | `files` | A JSON array of paths from the repository root. `check`: the Markdown files that need a sync. `sync`: the files it wrote. `render`: the SVG files it wrote. `validate`: the files with an error. `generate`: the diagrams that drifted in check mode, the files written in write mode. |
 | `changes` | `generate`: a JSON array, one entry per diagram that drifted, with its source name, its file, the number of changes, and the sentence that names them, such as `Added 1 node (logs).` |
 | `pull-request` | `generate` with `on-drift: pr`: the address of the pull request opened or edited, or empty. Once nothing drifts, the pull request it opened before is closed with a comment and its branch deleted. |
-| `published` | `generate` with `publish`: a JSON array of what was published, each with its source name, link, and stable link. |
+| `published` | `generate` with `publish`: a JSON array of what was published, each with `name`, `kind` (`personal` or `organization`), `url`, `stableLink` (or null), `svgUrl` (an organisation's picture, served to the key; or null), `id`, and `organization`. |
 
 ```yaml
 - id: plotwork
