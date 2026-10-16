@@ -1,6 +1,6 @@
 # Written by the Plotwork monorepo build (pnpm action:build) from apps/action/src/metadata.ts. Do not edit by hand.
 name: 'Plotwork diagrams'
-description: 'Check, sync, validate, and render Plotwork diagrams in Markdown and .diagram files. Offline: no network, token, or telemetry.'
+description: 'Check, sync, validate, and render Plotwork diagrams with your repository settings. Offline by default: no token or telemetry.'
 author: 'Buun Group'
 branding:
   icon: 'layout'
@@ -31,6 +31,14 @@ inputs:
     description: 'When true, check and sync treat each mermaid fence that converts to Plotwork as a diagram: check reports it, and sync replaces it with a diagram fence and draws it.'
     required: false
     default: 'false'
+  config:
+    description: 'The repository settings: a JSON file relative to working-directory whose defaults every command applies to the headers and whose rules check and validate apply. Empty looks for plotwork.config.json, then .plotwork/config.json, in working-directory and each folder above it up to the repository root, and applies none when there is none. One file per run: a settings file in a subfolder is not read. off applies none.'
+    required: false
+    default: ''
+  rules-org:
+    description: 'An organisation id or slug whose saved style rules check and validate apply instead of the rules of the settings file, read from the Plotwork API with the organisation key in the PLOTWORK_API_KEY environment variable. The settings file''s defaults still apply. The only network request the action makes, and only when set.'
+    required: false
+    default: ''
   summary:
     description: 'When true, write a job summary: a table of files, their status, and how to fix each problem.'
     required: false
