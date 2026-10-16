@@ -67,6 +67,18 @@ inputs:
     description: 'generate in write mode: the token that pushes and opens the pull request. A pull request opened with the default token starts no workflow; pass a GitHub App or personal token to run checks on it.'
     required: false
     default: '${{ github.token }}'
+  since:
+    description: 'generate only. A git ref, such as origin/main or ${{ github.event.pull_request.base.sha }}: only the sources whose files, overrides, or diagram changed since it run, and every source when the settings file changed. Needs the history: check out with fetch-depth: 0. Empty runs every source; keep a nightly run without it, since a new engine can redraw pictures no file change points at.'
+    required: false
+    default: ''
+  sarif-file:
+    description: 'generate only. A file to write a SARIF report to, for github/codeql-action/upload-sarif: each drifted diagram and each problem as a code scanning alert on its line. Empty writes none.'
+    required: false
+    default: ''
+  junit-file:
+    description: 'generate only. A file to write a JUnit XML report to, one test case for each source, for a test view. Empty writes none.'
+    required: false
+    default: ''
   summary:
     description: 'When true, write a job summary: a table of files, their status, and how to fix each problem.'
     required: false
