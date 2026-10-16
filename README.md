@@ -283,6 +283,10 @@ All inputs are optional.
 | `since` | `''` | `generate` only. A git ref, such as `origin/main` or `${{ github.event.pull_request.base.sha }}`: only the sources whose files, overrides, or diagram changed since it run, and every source when the settings file changed. Needs `fetch-depth: 0`. Empty runs every source. |
 | `sarif-file` | `''` | `generate` only. A file inside the repository to write a SARIF report to, for `github/codeql-action/upload-sarif`. Empty writes none. |
 | `junit-file` | `''` | `generate` only. A file inside the repository to write a JUnit XML report to, one test case for each source. Empty writes none. |
+| `report-file` | `''` | `generate` only. A file to write the versioned JSON report to ([schema](https://docs.plotwork.dev/schemas/plotwork.report.json), `schemaVersion` 1): the run, and per source its files, status, changes by meaning, counts, problems, and CODEOWNERS owners. Empty writes none. |
+| `comment` | `auto` | `generate` only, on `pull_request` runs. `auto` writes one comment when a diagram drifted or has an error (the change table, pictures before and after, the owners, and how to fix it) and edits that same comment on later runs, saying so when everything is in step again. `always` writes it on every run, `never` writes none. Needs `pull-requests: write`; when the token cannot comment, as on a pull request from a fork, a notice says so and the job summary has everything. |
+| `mention-owners` | `false` | `generate` only. When `true`, the comment names the CODEOWNERS owners of each drifted diagram as @-mentions, which notifies them. `false` names them without notifying anyone. |
+| `report-drift` | `false` | `generate` only. When `true`, sends the run's metadata (repository, ref, commit, and per source its name, out path, status, change counts, and owners; never a diagram or a file) to the organisation's drift dashboard on Plotwork, with the organisation key in `PLOTWORK_API_KEY`. Pro and Enterprise. A refusal is a notice and fails nothing. |
 | `summary` | `true` | Write a job summary with a table of files and how to fix each problem. |
 | `working-directory` | `.` | The folder to run in, relative to the repository root. Annotations and the `files` output still name paths from the repository root. |
 
@@ -299,6 +303,7 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 | `changes` | `generate`: a JSON array, one entry per diagram that drifted, with its source name, its file, the number of changes, and the sentence that names them, such as `Added 1 node (logs).` |
 | `pull-request` | `generate` with `on-drift: pr`: the address of the pull request opened or edited, or empty. Once nothing drifts, the pull request it opened before is closed with a comment and its branch deleted. |
 | `published` | `generate` with `publish`: a JSON array of what was published, each with `name`, `kind` (`personal` or `organization`), `url`, `stableLink` (or null), `svgUrl` (an organisation's picture, served to the key; or null), `id`, and `organization`. |
+| `comment-url` | `generate` on a pull request: the address of the comment it wrote or edited, or empty. |
 
 ```yaml
 - id: plotwork
@@ -318,6 +323,7 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 | `check`, `validate`, `render` | `contents: read` |
 | `sync` | `contents: read`. The step that commits or opens a pull request needs `contents: write`, and `pull-requests: write` to open one. |
 | `generate` | `contents: read` in check mode. In write mode `contents: write`, and `pull-requests: write` with `on-drift: pr`, plus "Allow GitHub Actions to create and approve pull requests". |
+| `generate` with `comment` | `pull-requests: write`, to write and edit the pull request comment. |
 
 Only `generate` in write mode reads a token (`github-token`) and calls GitHub's API; with `publish` it also calls the Plotwork API with `PLOTWORK_API_KEY`. Both are masked and never printed. Check out with `persist-credentials: false` unless a later step pushes.
 
