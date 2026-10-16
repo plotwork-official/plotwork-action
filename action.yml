@@ -1,6 +1,6 @@
 # Written by the Plotwork monorepo build (pnpm action:build) from apps/action/src/metadata.ts. Do not edit by hand.
 name: 'Plotwork diagrams'
-description: 'Check, sync, validate, and render Plotwork diagrams with your repository settings. Offline by default: no token or telemetry.'
+description: 'Check, sync, validate, render, and generate Plotwork diagrams from your files. Offline by default, with no telemetry.'
 author: 'Buun Group'
 branding:
   icon: 'layout'
@@ -8,7 +8,7 @@ branding:
 
 inputs:
   command:
-    description: 'What to do. check fails when a picture is stale or a diagram has an error, and writes nothing. sync redraws the stale pictures in the workspace and commits nothing. validate reports errors and warnings without drawing pictures into files. render draws each .diagram file to a light and a dark SVG in out-dir.'
+    description: 'What to do. check fails when a picture is stale or a diagram has an error, and writes nothing. sync redraws the stale pictures in the workspace and commits nothing. validate reports errors and warnings without drawing pictures into files. render draws each .diagram file to a light and a dark SVG in out-dir. generate makes each diagram the sources of the settings file name from its files (Terraform, OpenAPI, Compose, Kubernetes, schemas, workflows, data) and, with mode, reports or writes the ones that drifted.'
     required: false
     default: 'check'
   paths:
@@ -39,6 +39,34 @@ inputs:
     description: 'An organisation id or slug whose saved style rules check and validate apply instead of the rules of the settings file, read from the Plotwork API with the organisation key in the PLOTWORK_API_KEY environment variable. The settings file''s defaults still apply. The only network request the action makes, and only when set.'
     required: false
     default: ''
+  mode:
+    description: 'generate only. check fails when a diagram no longer matches its files, says what changed, and writes nothing. write makes the diagrams again and does what on-drift says with them.'
+    required: false
+    default: 'check'
+  on-drift:
+    description: 'generate in write mode only. pr pushes the new diagrams to pr-branch and opens or updates one pull request (needs contents: write and pull-requests: write). commit commits them to the branch the run is on (needs contents: write), and does nothing when the commit that started the run is its own. fail only fails, leaving the files in the workspace.'
+    required: false
+    default: 'pr'
+  pr-branch:
+    description: 'generate with on-drift pr: the branch the new diagrams are pushed to. The action owns it: each run replaces it with one commit on top of the branch the run is on.'
+    required: false
+    default: 'plotwork/diagrams'
+  pr-title:
+    description: 'generate with on-drift pr: the title of the pull request.'
+    required: false
+    default: 'docs: regenerate diagrams from their sources'
+  commit-message:
+    description: 'generate in write mode: the message of the commit. The action adds the trailer Plotwork-Generated: true, by which it knows its own commits.'
+    required: false
+    default: 'docs: regenerate diagrams from their sources'
+  publish:
+    description: 'generate in write mode: when true, publish each source that has a publish section to Plotwork with the key in the PLOTWORK_API_KEY environment variable: a stable link for a personal key, or the organisation library. Without a key it is skipped with a notice. Only the generated diagram source is sent, never the files it was made from.'
+    required: false
+    default: 'false'
+  github-token:
+    description: 'generate in write mode: the token that pushes and opens the pull request. A pull request opened with the default token starts no workflow; pass a GitHub App or personal token to run checks on it.'
+    required: false
+    default: '${{ github.token }}'
   summary:
     description: 'When true, write a job summary: a table of files, their status, and how to fix each problem.'
     required: false
@@ -50,13 +78,19 @@ inputs:
 
 outputs:
   stale:
-    description: 'The number of diagrams whose picture was missing or out of date: found by check, redrawn by sync. 0 for validate and render.'
+    description: 'The number of diagrams whose picture was missing or out of date: found by check, redrawn by sync, drifted from their files in generate. 0 for validate and render.'
   errors:
     description: 'The number of errors found.'
   warnings:
     description: 'The number of warnings found.'
   files:
-    description: 'A JSON array of paths from the repository root. check: the Markdown files that need a sync. sync: the files it wrote. render: the SVG files it wrote. validate: the files with an error.'
+    description: 'A JSON array of paths from the repository root. check: the Markdown files that need a sync. sync: the files it wrote. render: the SVG files it wrote. validate: the files with an error. generate: the diagrams that drifted in check mode, the files it wrote in write mode.'
+  changes:
+    description: 'generate: a JSON array with one entry per diagram that drifted: its source name, its out file, the number of changes by meaning, and one sentence naming them, such as Added 1 node (logs).'
+  pull-request:
+    description: 'generate with on-drift pr: the address of the pull request it opened or updated, or empty. When nothing drifted, the pull request it opened before is closed with its branch, and this is empty.'
+  published:
+    description: 'generate with publish: a JSON array of what was published, each with its source name and link (and stable link, for an alias).'
 
 runs:
   using: 'node24'
