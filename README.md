@@ -140,6 +140,8 @@ All inputs are optional.
 | `out-dir` | `plotwork-svg` | Where `render` writes, relative to `working-directory`. It must be inside the repository. |
 | `fail-on` | `error` | `error` fails on errors, and on stale pictures in `check`. `warning` fails on warnings as well. `never` only reports. |
 | `convert-mermaid` | `false` | When `true`, `check` and `sync` treat each `mermaid` fence that converts to Plotwork as a diagram. |
+| `config` | `''` | The repository settings file, relative to `working-directory`. Every command applies its header defaults, and `check` and `validate` apply its style rules. Empty looks for `plotwork.config.json`, then `.plotwork/config.json`, from `working-directory` up to the repository root. One file per run. `off` applies none. |
+| `rules-org` | `''` | An organisation id or slug whose saved style rules `check` and `validate` apply instead of the file's rules. They are read from the Plotwork API with the organisation key in the `PLOTWORK_API_KEY` environment variable. The file's defaults still apply. This is the only network request the action makes, and only when set. |
 | `summary` | `true` | Write a job summary with a table of files and how to fix each problem. |
 | `working-directory` | `.` | The folder to run in, relative to the repository root. Annotations and the `files` output still name paths from the repository root. |
 
