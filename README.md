@@ -4,7 +4,7 @@
 [![release](https://img.shields.io/github/v/release/plotwork-official/plotwork-action?sort=semver)](https://github.com/plotwork-official/plotwork-action/releases)
 [![licence](https://img.shields.io/github/license/plotwork-official/plotwork-action)](LICENSE)
 
-Checks, redraws, validates, and renders [Plotwork](https://plotwork.dev) diagrams in a GitHub workflow. A Plotwork diagram is a `diagram` fence in Markdown, with a committed light and dark SVG under it, or a standalone `.diagram` file. This action fails a pull request whose pictures no longer match their source, puts each problem on its line in the Files changed tab, and writes a job summary that says how to fix it. The diagram engine is bundled into `dist/index.js`: the action installs nothing, makes no network request, needs no token or account, and counts nothing.
+Checks, redraws, validates, and renders [Plotwork](https://plotwork.dev) diagrams in a GitHub workflow. A Plotwork diagram is a `diagram` fence in Markdown, with a committed light and dark SVG under it, or a standalone `.diagram` file. This action fails a pull request whose pictures no longer match their source, puts each problem on its line in the Files changed tab, and writes a job summary that says how to fix it. The diagram engine is bundled into `dist/index.js`: the action installs nothing and counts nothing. By default it makes no network request and needs no token or account; only `generate` in write mode talks to GitHub with the workflow's token, and to Plotwork when you turn on `publish`.
 
 ## Quick start
 
@@ -40,6 +40,7 @@ With no inputs it runs `check` on every Markdown file and every `.diagram` file 
 | `sync` | `paths` | The Markdown files and their SVGs, in the workspace | A diagram has an error |
 | `validate` | `paths` and `diagrams` | Nothing | A diagram has an error (or a warning, with `fail-on: warning`) |
 | `render` | `diagrams` | Two SVGs per `.diagram` file in `out-dir` | A diagram has an error |
+| `generate` | The `sources` of `plotwork.config.json` | Nothing in check mode; with `mode: write`, the diagrams, then a pull request or a commit | A diagram drifted from its files, or a diagram has an error |
 
 Every command annotates each problem on its file and line, sets the outputs, and writes a job summary unless `summary` is `false`. `fail-on` changes which problems fail the step.
 
@@ -126,6 +127,94 @@ Draws each `.diagram` file to a light and a dark SVG in `out-dir`, keeping its f
     path: build/diagrams
 ```
 
+### generate
+
+A complete working example, which is also the smoke test of every release, is [plotwork-examples](https://github.com/plotwork-official/plotwork-examples).
+
+Makes each diagram that the `sources` of `plotwork.config.json` name from its files (Terraform, OpenAPI, Docker Compose, Kubernetes, Prisma, Drizzle, SQL, GitHub Actions workflows, CSV, JSON, folder listings, git logs), applies its overrides file, and fails on drift with what changed: nodes and edges added, removed, and changed. With `mode: write` it writes the diagrams and, by `on-drift`, opens or edits one pull request from `pr-branch` (the default), commits to the branch the run is on (`commit`; never on its own commit), or only fails (`fail`). With `publish: true` and an API key in `PLOTWORK_API_KEY`, each source that has a `publish` section goes to a stable link or an organisation library; only the generated diagram source is sent, never the files it was made from. See [Diagrams as code](https://docs.plotwork.dev/diagrams-as-code).
+
+A pull request check:
+
+```yaml
+name: diagrams
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: plotwork-official/plotwork-action@v1
+        with:
+          command: generate
+```
+
+Regenerate on main, or nightly, and open a pull request:
+
+```yaml
+name: diagrams-regenerate
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 4 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the pull request branch
+      pull-requests: write # open or edit the pull request
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: plotwork-official/plotwork-action@v1
+        with:
+          command: generate
+          mode: write
+```
+
+The repository must allow GitHub Actions to create pull requests (Settings, Actions, General). A pull request opened with the workflow's own token starts no workflow; pass a GitHub App or personal token in `github-token` to run its checks.
+
+Publish to an organisation:
+
+```yaml
+name: diagrams-publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: plotwork-official/plotwork-action@v1
+        with:
+          command: generate
+          mode: write
+          publish: true
+        env:
+          PLOTWORK_API_KEY: ${{ secrets.PLOTWORK_API_KEY }}
+```
+
 Complete workflows for each command are in [`examples/`](examples).
 
 ## Inputs
@@ -134,14 +223,21 @@ All inputs are optional.
 
 | Input | Default | Description |
 |---|---|---|
-| `command` | `check` | `check`, `sync`, `validate`, or `render`. |
+| `command` | `check` | `check`, `sync`, `validate`, `render`, or `generate`. |
 | `paths` | `**/*.md` | Markdown files for `check`, `sync`, and `validate`: one glob, file, or folder per line, relative to `working-directory`. A line that starts with `!` leaves out what it matches; a line that starts with `#` is a comment. `node_modules` and `.git` are never searched. |
 | `diagrams` | `**/*.diagram` | Standalone `.diagram` files, in the same form. `check` and `validate` report their errors, `render` draws them, `sync` ignores them. Set it to `''` for none. |
 | `out-dir` | `plotwork-svg` | Where `render` writes, relative to `working-directory`. It must be inside the repository. |
 | `fail-on` | `error` | `error` fails on errors, and on stale pictures in `check`. `warning` fails on warnings as well. `never` only reports. |
 | `convert-mermaid` | `false` | When `true`, `check` and `sync` treat each `mermaid` fence that converts to Plotwork as a diagram. |
 | `config` | `''` | The repository settings file, relative to `working-directory`. Every command applies its header defaults, and `check` and `validate` apply its style rules. Empty looks for `plotwork.config.json`, then `.plotwork/config.json`, from `working-directory` up to the repository root. One file per run. `off` applies none. |
-| `rules-org` | `''` | An organisation id or slug whose saved style rules `check` and `validate` apply instead of the file's rules. They are read from the Plotwork API with the organisation key in the `PLOTWORK_API_KEY` environment variable. The file's defaults still apply. This is the only network request the action makes, and only when set. |
+| `rules-org` | `''` | An organisation id or slug whose saved style rules `check` and `validate` apply instead of the file's rules. They are read from the Plotwork API with the organisation key in the `PLOTWORK_API_KEY` environment variable. The file's defaults still apply. Apart from `generate` in write mode, this is the only network request the action makes, and only when set. |
+| `mode` | `check` | `generate` only. `check` fails on drift and writes nothing; `write` makes the diagrams again and does what `on-drift` says. |
+| `on-drift` | `pr` | `generate` in write mode. `pr` pushes to `pr-branch` and opens or edits one pull request; `commit` commits to the branch the run is on, and does nothing on its own commit; `fail` only fails. |
+| `pr-branch` | `plotwork/diagrams` | The branch `pr` pushes to. The action owns it: each run replaces it with one commit on the branch the run is on. |
+| `pr-title` | `docs: regenerate diagrams from their sources` | The pull request's title. |
+| `commit-message` | `docs: regenerate diagrams from their sources` | The commit message; the action adds the trailer `Plotwork-Generated: true`. |
+| `publish` | `false` | In write mode, publish each source that has a `publish` section with the key in `PLOTWORK_API_KEY`. Without a key it is skipped with a notice. |
+| `github-token` | `${{ github.token }}` | The token that pushes and opens the pull request. |
 | `summary` | `true` | Write a job summary with a table of files and how to fix each problem. |
 | `working-directory` | `.` | The folder to run in, relative to the repository root. Annotations and the `files` output still name paths from the repository root. |
 
@@ -151,10 +247,13 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 
 | Output | Description |
 |---|---|
-| `stale` | Diagrams whose picture was missing or out of date: found by `check`, redrawn by `sync`. `0` for `validate` and `render`. |
+| `stale` | Diagrams whose picture was missing or out of date: found by `check`, redrawn by `sync`, drifted from their files in `generate`. `0` for `validate` and `render`. |
 | `errors` | Errors found. |
 | `warnings` | Warnings found. |
-| `files` | A JSON array of paths from the repository root. `check`: the Markdown files that need a sync. `sync`: the files it wrote. `render`: the SVG files it wrote. `validate`: the files with an error. |
+| `files` | A JSON array of paths from the repository root. `check`: the Markdown files that need a sync. `sync`: the files it wrote. `render`: the SVG files it wrote. `validate`: the files with an error. `generate`: the diagrams that drifted in check mode, the files written in write mode. |
+| `changes` | `generate`: a JSON array, one entry per diagram that drifted, with its source name, its file, the number of changes, and the sentence that names them, such as `Added 1 node (logs).` |
+| `pull-request` | `generate` with `on-drift: pr`: the address of the pull request opened or edited, or empty. Once nothing drifts, the pull request it opened before is closed with a comment and its branch deleted. |
+| `published` | `generate` with `publish`: a JSON array of what was published, each with its source name, link, and stable link. |
 
 ```yaml
 - id: plotwork
@@ -173,8 +272,9 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 |---|---|
 | `check`, `validate`, `render` | `contents: read` |
 | `sync` | `contents: read`. The step that commits or opens a pull request needs `contents: write`, and `pull-requests: write` to open one. |
+| `generate` | `contents: read` in check mode. In write mode `contents: write`, and `pull-requests: write` with `on-drift: pr`, plus "Allow GitHub Actions to create and approve pull requests". |
 
-The action reads no token and calls no API. Check out with `persist-credentials: false` unless a later step pushes.
+Only `generate` in write mode reads a token (`github-token`) and calls GitHub's API; with `publish` it also calls the Plotwork API with `PLOTWORK_API_KEY`. Both are masked and never printed. Check out with `persist-credentials: false` unless a later step pushes.
 
 ## How it relates to the command line and the MCP server
 
@@ -208,11 +308,11 @@ Any engine change that draws a different picture makes committed pictures stale,
 
 ## FAQ
 
-**Does it send my diagrams anywhere?** No. Everything runs in the runner's process. There is no telemetry and no network request.
+**Does it send my diagrams anywhere?** Not by default. Everything runs in the runner's process, with no telemetry. Only `generate` with `publish: true` sends anything: the generated diagram source, to the Plotwork API, with your key. The files it was made from never leave the runner.
 
 **Why does the check fail on a picture I just drew?** The picture was drawn by another engine version. Run this action with `command: sync`, which draws with the same engine as the check, or the pinned command from the job summary once it gives one.
 
-**Can it commit for me?** No. It never holds a token. See [sync](#sync) for pairing it with an action that commits.
+**Can it commit for me?** Only `generate` in write mode, with the workflow's token: a pull request (the default) or a commit to the branch. `sync` never holds a token; see [sync](#sync) for pairing it with an action that commits.
 
 **Which Node does it need?** None of yours. It runs on the `node24` runtime that GitHub provides to actions.
 
