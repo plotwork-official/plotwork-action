@@ -68,7 +68,7 @@ inputs:
     required: false
     default: '${{ github.token }}'
   since:
-    description: 'generate only. A git ref, such as origin/main or ${{ github.event.pull_request.base.sha }}: only the sources whose files, overrides, or diagram changed since it run, and every source when the settings file changed. Needs the history: check out with fetch-depth: 0. Empty runs every source; keep a nightly run without it, since a new engine can redraw pictures no file change points at.'
+    description: 'generate only. A git ref, such as origin/main or the base commit of the pull request (github.event.pull_request.base.sha): only the sources whose files, overrides, or diagram changed since it run, and every source when the settings file changed. Needs the history: check out with fetch-depth: 0. Empty runs every source; keep a nightly run without it, since a new engine can redraw pictures no file change points at.'
     required: false
     default: ''
   sarif-file:
@@ -79,6 +79,22 @@ inputs:
     description: 'generate only. A file to write a JUnit XML report to, one test case for each source, for a test view. Empty writes none.'
     required: false
     default: ''
+  report-file:
+    description: 'generate only. A file to write the versioned JSON report to (schema https://docs.plotwork.dev/schemas/plotwork.report.json, schemaVersion 1): the run, and per source its files, status, changes by meaning, counts, problems, and CODEOWNERS owners. Empty writes none.'
+    required: false
+    default: ''
+  comment:
+    description: 'generate only, on pull_request runs. auto writes one comment on the pull request when a diagram drifted or has an error, with the change table, the pictures before and after, the owners, and how to fix it, and edits that same comment on later runs, to say so when everything is in step again. always writes it on every run. never writes none. Needs pull-requests: write; when the token cannot comment, as on a pull request from a fork, the run says so in a notice and the job summary has everything.'
+    required: false
+    default: 'auto'
+  mention-owners:
+    description: 'generate only. When true, the pull request comment names the CODEOWNERS owners of each drifted diagram as @-mentions, which notifies them. False names them without notifying anyone.'
+    required: false
+    default: 'false'
+  report-drift:
+    description: 'generate only. When true, send the run''s metadata (the repository, the ref and commit, and per source its name, out path, status, change counts, and owners; never a diagram or a file) to the organisation''s drift dashboard on Plotwork, with the organisation key in the PLOTWORK_API_KEY environment variable. The organisation is rules-org, else brand.organization of the settings, else the key''s own. Pro. A refusal is a notice and fails nothing.'
+    required: false
+    default: 'false'
   summary:
     description: 'When true, write a job summary: a table of files, their status, and how to fix each problem.'
     required: false
@@ -103,6 +119,8 @@ outputs:
     description: 'generate with on-drift pr: the address of the pull request it opened or updated, or empty. When nothing drifted, the pull request it opened before is closed with its branch, and this is empty.'
   published:
     description: 'generate with publish: a JSON array of what was published, each with its source name and link (and stable link, for an alias).'
+  comment-url:
+    description: 'generate on a pull request: the address of the comment it wrote or edited, or empty.'
 
 runs:
   using: 'node24'
