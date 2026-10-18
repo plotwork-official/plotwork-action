@@ -2,6 +2,19 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.0.0-beta.9 (2026-10-18)
+
+
+### Added
+
+* **action:** bundle the engine whose imported arrows show their relationship with an icon and a line colour, and whose frames are all typed
+* **action:** bundle the engine whose verb labels draw icons and whose plainly named groups are typed; style suggestions are notices that never fail fail-on: warning
+
+
+### Fixed
+
+* **action:** bundle the engine whose AsyncAPI pictures draw receives above an application and sends below it
+
 ## 1.0.0-beta.8 (2026-10-18)
 
 
