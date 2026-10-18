@@ -357,6 +357,31 @@ Releases follow [semantic versioning](https://semver.org). They are built and pu
 
 Any engine change that draws a different picture makes committed pictures stale, so it is a major release. Pin to the full commit SHA of a release for builds that must never change, and let Dependabot propose updates.
 
+## Verify
+
+Every release has `dist/checksums.txt`, the SHA-256 of the bundle and its notices. In a checkout of the release:
+
+```bash
+(cd dist && sha256sum --check --strict checksums.txt)
+```
+
+Every release after `v1.0.0-beta.6` also has a signed build provenance attestation for `dist/index.js` and `dist/checksums.txt`, made by this repository's `release.yml` with GitHub artifact attestations and recorded in the public Sigstore transparency log. With the GitHub CLI:
+
+```bash
+gh attestation verify dist/index.js --repo plotwork-official/plotwork-action
+```
+
+To require this repository's release workflow and the tag as well:
+
+```bash
+gh attestation verify dist/index.js \
+  --repo plotwork-official/plotwork-action \
+  --signer-workflow plotwork-official/plotwork-action/.github/workflows/release.yml \
+  --source-ref refs/tags/v1.2.3
+```
+
+The attestation proves the file is the one in the release tag and was signed by this repository's release workflow. The bundle is built in the private Plotwork monorepo, so the attestation does not describe that build; each commit message names the monorepo commit it was built from.
+
 ## FAQ
 
 **Does it send my diagrams anywhere?** Not by default. Everything runs in the runner's process, with no telemetry. Only `generate` with `publish: true` sends anything: the generated diagram source, to the Plotwork API, with your key. The files it was made from never leave the runner.
