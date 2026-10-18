@@ -73,7 +73,7 @@ The build writes this file from the contents of the bundle. Do not edit it.
 - Licence declared: CC0-1.0
 - Used under: CC0-1.0
 - Repository: https://github.com/simple-icons/simple-icons
-- What is in the bundle: The path data of each brand mark, copied by gen:icons into a generated module and drawn as inline SVG.
+- What is in the bundle: The path data of each brand mark, copied by gen:icons into a generated module and drawn as inline SVG. gen:icon-art splits it into the catalog the bundle holds, with the paths of the marks most diagrams draw, and the shards in icons/simple/ beside the bundle, which hold every path.
 - Copyright: No copyright line in the licence file. The package names Simple Icons Collaborators as its author.
 - NOTICE file: none shipped
 - Licence text: [text 5](#licence-text-5)
@@ -85,7 +85,7 @@ The build writes this file from the contents of the bundle. Do not edit it.
 - Licence declared: CC0-1.0
 - Used under: CC0-1.0
 - Repository: https://github.com/gilbarbara/logos
-- What is in the bundle: The full colour file of each of a few brand marks that Simple Icons does not publish, copied by gen:icons into a generated module as the text of a standalone SVG and drawn unmodified, as an image, on a light tile.
+- What is in the bundle: The full colour file of each of a few brand marks that Simple Icons does not publish, copied by gen:icons into a generated module as the text of a standalone SVG and drawn unmodified, as an image, on a light tile. gen:icon-art keeps the files most diagrams draw in the bundle and every file in the shards in icons/simple/ beside it.
 - Copyright: No copyright line in the licence file.
 - Licence file: the package ships none, so the licence text its authors publish is used, from https://raw.githubusercontent.com/gilbarbara/logos/master/LICENSE.txt
 - NOTICE file: none shipped
