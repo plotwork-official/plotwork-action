@@ -2,6 +2,10 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.0.0 (2026-10-20)
+
+The stable release of 1.0.0-beta.1, 1.0.0-beta.2, 1.0.0-beta.3, 1.0.0-beta.4, 1.0.0-beta.5, 1.0.0-beta.6, 1.0.0-beta.7, 1.0.0-beta.8, 1.0.0-beta.9, 1.0.0-beta.10, 1.0.0-beta.11, 1.0.0-beta.12, 1.0.0-beta.13, 1.0.0-beta.14. The changes are listed under those versions below.
+
 ## 1.0.0-beta.14 (2026-10-20)
 
 
