@@ -2,6 +2,14 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.1.0-beta.1 (2026-10-20)
+
+
+### Added
+
+* **action:** bundle the engine that warns W700 to W710 for what looks like a credential in a diagram's source, with the value masked, so fail-on: warning fails on a key in a label
+* **action:** bundle the engine where an icon= that names nothing is warning W208 and draws the default icon, with SAP and plain glyphs for ServiceNow, Workday, Zscaler and CrowdStrike
+
 ## 1.0.0 (2026-10-20)
 
 The stable release of 1.0.0-beta.1, 1.0.0-beta.2, 1.0.0-beta.3, 1.0.0-beta.4, 1.0.0-beta.5, 1.0.0-beta.6, 1.0.0-beta.7, 1.0.0-beta.8, 1.0.0-beta.9, 1.0.0-beta.10, 1.0.0-beta.11, 1.0.0-beta.12, 1.0.0-beta.13, 1.0.0-beta.14. The changes are listed under those versions below.
