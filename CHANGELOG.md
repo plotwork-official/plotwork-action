@@ -2,6 +2,13 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.1.0-beta.2 (2026-10-21)
+
+
+### Fixed
+
+* **release:** committed pins name stable releases only (Action v1.0.0, CLI 0.1.0, MCP 0.1.0), and a beta Action build names the matching CLI beta at build time
+
 ## 1.1.0-beta.1 (2026-10-20)
 
 
