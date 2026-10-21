@@ -36,7 +36,7 @@ inputs:
     required: false
     default: ''
   rules-org:
-    description: 'An organisation id or slug whose saved style rules check and validate apply instead of the rules of the settings file, read from the Plotwork API with the organisation key in the PLOTWORK_API_KEY environment variable. The settings file''s defaults still apply. The only network request the action makes, and only when set.'
+    description: 'An organisation id or slug whose saved style rules check and validate apply instead of the rules of the settings file, read from the Plotwork API with the organisation key in the PLOTWORK_API_KEY environment variable, or, with no key and permissions: id-token: write, as a trusted publisher of the organisation. The settings file''s defaults still apply. The only network request the action makes, and only when set.'
     required: false
     default: ''
   mode:
@@ -60,7 +60,7 @@ inputs:
     required: false
     default: 'docs: regenerate diagrams from their sources'
   publish:
-    description: 'generate in write mode: when true, publish each source that has a publish section to Plotwork with the key in the PLOTWORK_API_KEY environment variable: a stable link for a personal key, or the organisation library. Without a key it is skipped with a notice. Only the generated diagram source is sent, never the files it was made from.'
+    description: 'generate in write mode: when true, publish each source that has a publish section to Plotwork with the key in the PLOTWORK_API_KEY environment variable: a stable link for a personal key, or the organisation library. With no key and permissions: id-token: write, it signs in as a trusted publisher of the organisation and publishes to its library. Without either it is skipped with a notice. Only the generated diagram source is sent, never the files it was made from.'
     required: false
     default: 'false'
   github-token:
@@ -92,7 +92,7 @@ inputs:
     required: false
     default: 'false'
   report-drift:
-    description: 'generate only. When true, send the run''s metadata (the repository, the ref and commit, and per source its name, out path, status, change counts, and owners; never a diagram or a file) to the organisation''s drift dashboard on Plotwork, with the organisation key in the PLOTWORK_API_KEY environment variable. The organisation is rules-org, else brand.organization of the settings, else the key''s own. Pro. A refusal is a notice and fails nothing.'
+    description: 'generate only. When true, send the run''s metadata (the repository, the ref and commit, and per source its name, out path, status, change counts, and owners; never a diagram or a file) to the organisation''s drift dashboard on Plotwork, with the organisation key in the PLOTWORK_API_KEY environment variable, or, with no key and permissions: id-token: write, as a trusted publisher of the organisation. The organisation is rules-org, else brand.organization of the settings, else the key''s own. Pro. A refusal is a notice and fails nothing.'
     required: false
     default: 'false'
   summary:
@@ -112,7 +112,7 @@ outputs:
   warnings:
     description: 'The number of warnings found.'
   files:
-    description: 'A JSON array of paths from the repository root. check: the Markdown files that need a sync. sync: the files it wrote. render: the SVG files it wrote. validate: the files with an error. generate: the diagrams that drifted in check mode, the files it wrote in write mode.'
+    description: 'A JSON array of paths from the repository root. check: the Markdown files that need a sync. sync: the files it wrote, and the dark pictures Plotwork drew before that it removed once one SVG holds both schemes. render: the SVG files it wrote. validate: the files with an error. generate: the diagrams that drifted in check mode, the files it wrote or removed in write mode.'
   changes:
     description: 'generate: a JSON array with one entry per diagram that drifted: its source name, its out file, the number of changes by meaning, and one sentence naming them, such as Added 1 node (logs).'
   pull-request:
