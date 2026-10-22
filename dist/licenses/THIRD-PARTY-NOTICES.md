@@ -1,6 +1,6 @@
 # Third-party notices
 
-plotwork-official/plotwork-action 1.2.0-beta.2 is licensed under the MIT licence, in the file LICENSE. The single file dist/index.js also contains code and data from other people. This file lists them, with the licence each is used under and the full licence text. Those licences apply to that material. The MIT licence of plotwork-official/plotwork-action does not replace them, and it does not cover the vendor artwork described under "Trademarks and official icons".
+plotwork-official/plotwork-action 1.2.0-beta.3 is licensed under the MIT licence, in the file LICENSE. The single file dist/index.js also contains code and data from other people. This file lists them, with the licence each is used under and the full licence text. Those licences apply to that material. The MIT licence of plotwork-official/plotwork-action does not replace them, and it does not cover the vendor artwork described under "Trademarks and official icons".
 
 The build writes this file from the contents of the bundle. Do not edit it.
 
