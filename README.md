@@ -304,6 +304,8 @@ A mistake in the inputs, such as an unknown command or an `out-dir` outside the 
 | `pull-request` | `generate` with `on-drift: pr`: the address of the pull request opened or edited, or empty. Once nothing drifts, the pull request it opened before is closed with a comment and its branch deleted. |
 | `published` | `generate` with `publish`: a JSON array of what was published, each with `name`, `kind` (`personal` or `organization`), `url`, `stableLink` (or null), `svgUrl` (an organisation's picture, served to the key; or null), `id`, and `organization`. |
 | `comment-url` | `generate` on a pull request: the address of the comment it wrote or edited, or empty. |
+| `drift-url` | `generate` with `report-drift`: the address of the organisation's drift dashboard the run was sent to, or empty. |
+| `signed-in-as` | A JSON object with the organisation and publisher a run with no key signed in as, as a trusted publisher, such as `{"organization":"acme","publisher":"Platform CI"}`; empty when the run used a key or did not sign in. |
 
 ```yaml
 - id: plotwork
