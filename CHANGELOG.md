@@ -2,6 +2,14 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.2.0-beta.4 (2026-10-22)
+
+
+### Added
+
+* **action:** publish sends scheme, the light, dark or auto picture
+* **settings:** defaults.theme is the colour theme, defaults.scheme the pictures
+
 ## 1.2.0-beta.3 (2026-10-22)
 
 
