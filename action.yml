@@ -121,6 +121,10 @@ outputs:
     description: 'generate with publish: a JSON array of what was published, each with its source name and link (and stable link, for an alias).'
   comment-url:
     description: 'generate on a pull request: the address of the comment it wrote or edited, or empty.'
+  drift-url:
+    description: 'generate with report-drift: the address of the organisation''s drift dashboard the run was sent to, or empty when it was not sent.'
+  signed-in-as:
+    description: 'A JSON object with the organisation and publisher a run with no key signed in as, as a trusted publisher, such as {"organization":"acme","publisher":"Platform CI"}; empty when the run used a key or did not sign in.'
 
 runs:
   using: 'node24'
