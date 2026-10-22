@@ -2,6 +2,15 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.2.0-beta.1 (2026-10-22)
+
+
+### Added
+
+* **action:** sign in as a trusted publisher with no API key
+* one SVG per diagram by default
+* one SVG per diagram for new setups, with a notice ahead of the default change
+
 ## 1.1.0 (2026-10-21)
 
 The stable release of 1.1.0-beta.1, 1.1.0-beta.2. The changes are listed under those versions below.
