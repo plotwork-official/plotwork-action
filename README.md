@@ -1,3 +1,12 @@
+<p align="center">
+  <a href="https://plotwork.dev">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://plotwork.dev/brand/logo/plotwork-lockup-on-dark.svg">
+      <img alt="Plotwork" src="https://plotwork.dev/brand/logo/plotwork-lockup-on-light.svg" width="260">
+    </picture>
+  </a>
+</p>
+
 # Plotwork action
 
 [![ci](https://github.com/plotwork-official/plotwork-action/actions/workflows/ci.yml/badge.svg)](https://github.com/plotwork-official/plotwork-action/actions/workflows/ci.yml)
