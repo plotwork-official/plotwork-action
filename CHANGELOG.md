@@ -2,6 +2,56 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.2.0 (2026-10-23)
+
+The stable release of 1.2.0-beta.1, 1.2.0-beta.2, 1.2.0-beta.3, 1.2.0-beta.4, 1.2.0-beta.5. The changes are listed under those versions below.
+
+## 1.2.0-beta.5 (2026-10-23)
+
+
+### Added
+
+* **action:** send each source's format and the default branch with a run report
+* **brand:** the new mark on the public faces: MCP server icon, registry listing, Action badge and READMEs
+* **diagrams:** import graphql, protobuf, serverless, dockerfile, nginx, dbt and workspaces, and draw the icon each file names
+* **orgs:** organisation and personal legend settings, applied to hosted calls and CI
+
+## 1.2.0-beta.4 (2026-10-22)
+
+
+### Added
+
+* **action:** publish sends scheme, the light, dark or auto picture
+* **settings:** defaults.theme is the colour theme, defaults.scheme the pictures
+
+## 1.2.0-beta.3 (2026-10-22)
+
+
+### Added
+
+* **app:** Keys becomes Keys & CI, with API keys and Trusted publishers as two parts, /ci as a second address, and every mention renamed
+
+## 1.2.0-beta.2 (2026-10-22)
+
+
+### Added
+
+* **action:** the outputs signed-in-as and drift-url, so a later step can check a keyless sign-in and where the run was sent
+
+
+### Fixed
+
+* **action:** a diagram that matches its files is In sync, and a run not sent to the drift dashboard says the trusted publisher sign-in failed too
+
+## 1.2.0-beta.1 (2026-10-22)
+
+
+### Added
+
+* **action:** sign in as a trusted publisher with no API key
+* one SVG per diagram by default
+* one SVG per diagram for new setups, with a notice ahead of the default change
+
 ## 1.1.0 (2026-10-21)
 
 The stable release of 1.1.0-beta.1, 1.1.0-beta.2. The changes are listed under those versions below.
