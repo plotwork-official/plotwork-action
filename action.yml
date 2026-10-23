@@ -3,8 +3,8 @@ name: 'Plotwork diagrams'
 description: 'Check, sync, validate, render, and generate Plotwork diagrams from your files. Offline by default, with no telemetry.'
 author: 'Buun Group'
 branding:
-  icon: 'layout'
-  color: 'blue'
+  icon: 'grid'
+  color: 'green'
 
 inputs:
   command:
