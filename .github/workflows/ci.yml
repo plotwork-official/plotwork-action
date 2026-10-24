@@ -158,7 +158,8 @@ jobs:
         run: |
           test "$STALE" = 2
           echo "$FILES" | grep -q '"test/fixtures/stale/docs/assets/diagrams/sign-in.svg"'
-          test -f test/fixtures/stale/docs/assets/diagrams/sign-in.dark.svg
+          test ! -e test/fixtures/stale/docs/assets/diagrams/sign-in.dark.svg
+          grep -q 'prefers-color-scheme' test/fixtures/stale/docs/assets/diagrams/sign-in.svg
           grep -q '```diagram' test/fixtures/mermaid/notes.md
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           test -n "$(git status --porcelain)"
