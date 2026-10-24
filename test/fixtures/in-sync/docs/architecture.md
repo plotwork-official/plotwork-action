@@ -16,7 +16,7 @@ api -> db : "insert"
 
 </details>
 
-<!-- diagram:start id="checkout" hash="3f33bba6106d" -->
+<!-- diagram:start id="checkout" hash="ac365d7af2af" -->
 <img alt="Checkout: 3 nodes, 2 connections." src="assets/diagrams/checkout.svg">
 
 <details>
