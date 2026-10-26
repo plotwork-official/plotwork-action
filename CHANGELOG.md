@@ -2,6 +2,36 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.5.0 (2026-10-26)
+
+The stable release of 1.5.0-beta.1, 1.5.0-beta.2. The changes are listed under those versions below.
+
+## 1.5.0-beta.2 (2026-10-26)
+
+
+### Added
+
+* organisations choose which spacings and line shapes may be drawn
+
+## 1.5.0-beta.1 (2026-10-26)
+
+
+### Added
+
+* a split import's whole as one diagram, and combining a series
+* **api:** what big imports draw, chosen by the organisation and each member
+* **app:** diagram page, folders, board and editor UI pass
+* diagram series keep the parts of a split import together
+* diagram style settings, editor line menus and bar animation, docs and checks
+* **diagrams:** edges=, fit=, align and main=on shape how a flow is drawn
+* **diagrams:** spacing=compact|normal|roomy on the flow header
+* **quality:** look hints offer spacing=, and agents are told to read them
+
+
+### Fixed
+
+* **diagrams:** an organisation read that reaches the wrong address says so instead of blaming the key
+
 ## 1.4.0 (2026-10-26)
 
 The stable release of 1.4.0-beta.1. The changes are listed under those versions below.
