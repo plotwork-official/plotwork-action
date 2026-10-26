@@ -2,6 +2,30 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.3.0 (2026-10-26)
+
+The stable release of 1.3.0-beta.1, 1.3.0-beta.2. The changes are listed under those versions below.
+
+## 1.3.0-beta.2 (2026-10-25)
+
+
+### Added
+
+* **docs:** code highlighting for every fence language, and guide films with the guide-film skill
+
+
+### Fixed
+
+* **diagrams:** pictures alone that differ are not drift
+
+## 1.3.0-beta.1 (2026-10-24)
+
+
+### Added
+
+* published diagrams carry their source by default, and organisations keep diagrams editable
+* source in published diagrams by default, and every key of a system identity in the console
+
 ## 1.2.0 (2026-10-23)
 
 The stable release of 1.2.0-beta.1, 1.2.0-beta.2, 1.2.0-beta.3, 1.2.0-beta.4, 1.2.0-beta.5. The changes are listed under those versions below.
