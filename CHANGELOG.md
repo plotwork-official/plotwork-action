@@ -2,6 +2,18 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.5.1 (2026-10-27)
+
+The stable release of 1.5.1-beta.1. The changes are listed under those versions below.
+
+## 1.5.1-beta.1 (2026-10-27)
+
+
+### Fixed
+
+* **diagrams:** Bicep reads linter pragmas and treats imported files as libraries
+* **diagrams:** Dockerfile continuations, stage lookups and repeated-line fixes stay linear on hostile input
+
 ## 1.5.0 (2026-10-26)
 
 The stable release of 1.5.0-beta.1, 1.5.0-beta.2. The changes are listed under those versions below.
