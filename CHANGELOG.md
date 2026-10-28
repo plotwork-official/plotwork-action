@@ -2,6 +2,15 @@
 
 All notable changes to this action are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and releases follow [semantic versioning](https://semver.org/spec/v2.0.0.html). release-please writes each new section from the Conventional Commits with the scope `action`; the release workflow copies this file to the public repository without the links into the private one.
 
+## 1.7.0-beta.1 (2026-10-27)
+
+
+### Added
+
+* **diagrams,action:** write the organisation's settings into plotwork.config.json
+* **diagrams:** an organisation's chosen style and legend win over the repository's settings file
+* **generate:** fingerprint generated diagrams so hand edits are never lost unseen
+
 ## 1.6.0 (2026-10-27)
 
 The stable release of 1.6.0-beta.1, 1.6.0-beta.2, 1.6.0-beta.3. The changes are listed under those versions below.
